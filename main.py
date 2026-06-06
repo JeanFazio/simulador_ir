@@ -1,8 +1,9 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 
 from calculadora_ir import calcular_ir
 from formatador import formatar_moeda, formatar_porcentagem
+from exportador import exportar_txt, exportar_pdf
 
 
 def converter_valor(texto):
@@ -59,7 +60,60 @@ def limpar():
     campo_outras.insert(0, "0")
 
     texto_resultado.set("Preencha os dados e clique em calcular.")
+    
+def salvar_txt():
+    texto = texto_resultado.get()
 
+    if texto == "Preencha os dados e clique em calcular.":
+        messagebox.showwarning(
+            "Atenção",
+            "Calcule primeiro antes de exportar."
+        )
+        return
+
+    caminho = filedialog.asksaveasfilename(
+        title="Salvar Relatório TXT",
+        defaultextension=".txt",
+        filetypes=[
+            ("Arquivo TXT", "*.txt")
+        ],
+        initialfile="relatorio_ir.txt"
+    )
+
+    if caminho:
+
+        exportar_txt(texto, caminho)
+
+        messagebox.showinfo(
+            "Sucesso",
+            "TXT exportado com sucesso!"
+        )
+
+
+def salvar_pdf():
+    texto = texto_resultado.get()
+
+    if texto == "Preencha os dados e clique em calcular.":
+        messagebox.showwarning(
+            "Atenção",
+            "Calcule primeiro antes de exportar."
+        )
+        return
+
+    caminho = filedialog.asksaveasfilename(
+        title="Salvar PDF",
+        defaultextension=".pdf",
+        filetypes=[("Arquivo PDF", "*.pdf")],
+        initialfile="relatorio_ir.pdf"
+    )
+
+    if caminho:
+        exportar_pdf(texto, caminho)
+
+        messagebox.showinfo(
+            "Sucesso",
+            "PDF exportado com sucesso!"
+        )
 
 janela = tk.Tk()
 janela.title("Simulador de IR sobre Salário Mensal")
@@ -144,6 +198,31 @@ botao_limpar = tk.Button(
     command=limpar
 )
 botao_limpar.grid(row=0, column=1, padx=8)
+
+botao_txt = tk.Button(
+    frame_botoes,
+    text="Exportar TXT",
+    font=("Arial", 10, "bold"),
+    bg="#16a34a",
+    fg="white",
+    padx=14,
+    pady=8,
+    command=salvar_txt
+)
+botao_txt.grid(row=0, column=2, padx=5)
+
+botao_pdf = tk.Button(
+    frame_botoes,
+    text="Exportar PDF",
+    font=("Arial", 10, "bold"),
+    bg="#dc2626",
+    fg="white",
+    padx=14,
+    pady=8,
+    command=salvar_pdf
+)
+botao_pdf.grid(row=0, column=3, padx=5)
+
 
 texto_resultado = tk.StringVar()
 texto_resultado.set("Preencha os dados e clique em calcular.")
