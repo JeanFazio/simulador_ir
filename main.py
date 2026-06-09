@@ -11,6 +11,17 @@ def converter_valor(texto):
     return float(texto)
 
 
+def atualizar_resultado(texto):
+    texto_resultado.config(state="normal")
+    texto_resultado.delete("1.0", tk.END)
+    texto_resultado.insert("1.0", texto)
+    texto_resultado.config(state="disabled")
+
+
+def obter_resultado():
+    return texto_resultado.get("1.0", tk.END).strip()
+
+
 def calcular():
     try:
         salario_bruto = converter_valor(campo_salario.get())
@@ -29,7 +40,7 @@ def calcular():
             outras_deducoes
         )
 
-        texto_resultado.set(
+        texto = (
             f"Resultado da Simulação\n\n"
             f"Salário bruto: {formatar_moeda(resultado['salario_bruto'])}\n"
             f"Desconto INSS: {formatar_moeda(resultado['desconto_inss'])}\n"
@@ -39,9 +50,11 @@ def calcular():
             f"Base de cálculo: {formatar_moeda(resultado['base_calculo'])}\n"
             f"Alíquota aplicada: {formatar_porcentagem(resultado['aliquota'])}\n"
             f"Parcela a deduzir: {formatar_moeda(resultado['parcela_deduzir'])}\n\n"
-            f"Imposto de Renda devido: {formatar_moeda(resultado['ir_final'])}\n\n"
+            f"Imposto de Renda devido: {formatar_moeda(resultado['ir_final'])}\n"
             f"Salário líquido aproximado: {formatar_moeda(resultado['salario_liquido'])}"
         )
+
+        atualizar_resultado(texto)
 
     except ValueError:
         messagebox.showerror(
@@ -59,10 +72,10 @@ def limpar():
     campo_dependentes.insert(0, "0")
     campo_outras.insert(0, "0")
 
-    texto_resultado.set("Preencha os dados e clique em calcular.")
+    atualizar_resultado("Preencha os dados e clique em calcular.")
     
 def salvar_txt():
-    texto = texto_resultado.get()
+    texto = obter_resultado()
 
     if texto == "Preencha os dados e clique em calcular.":
         messagebox.showwarning(
@@ -91,7 +104,7 @@ def salvar_txt():
 
 
 def salvar_pdf():
-    texto = texto_resultado.get()
+    texto = obter_resultado()
 
     if texto == "Preencha os dados e clique em calcular.":
         messagebox.showwarning(
@@ -119,7 +132,7 @@ janela = tk.Tk()
 janela.title("Simulador de IR sobre Salário Mensal")
 janela.geometry("620x740")
 janela.configure(bg="#f4f6f8")
-janela.resizable(False, False)
+janela.resizable(True, True)
 
 titulo = tk.Label(
     janela,
@@ -224,25 +237,31 @@ botao_pdf = tk.Button(
 botao_pdf.grid(row=0, column=3, padx=5)
 
 
-texto_resultado = tk.StringVar()
-texto_resultado.set("Preencha os dados e clique em calcular.")
+frame_resultado = tk.Frame(janela, bg="#f4f6f8")
+frame_resultado.pack(pady=15, fill="both", expand=True)
 
-resultado_label = tk.Label(
-    janela,
-    textvariable=texto_resultado,
+scroll_resultado = tk.Scrollbar(frame_resultado)
+scroll_resultado.pack(side="right", fill="y")
+
+texto_resultado = tk.Text(
+    frame_resultado,
     font=("Arial", 11),
     bg="#ffffff",
     fg="#111827",
-    justify="left",
-    anchor="w",
-    padx=20,
-    pady=15,
+    wrap="word",
+    padx=15,
+    pady=10,
     width=60,
-    height=50,
+    height=18,
     relief="solid",
-    bd=1
+    bd=1,
+    yscrollcommand=scroll_resultado.set
 )
-resultado_label.pack(pady=15)
+texto_resultado.pack(side="left", fill="both", expand=True)
+texto_resultado.config(state="disabled")
+scroll_resultado.config(command=texto_resultado.yview)
+
+atualizar_resultado("Preencha os dados e clique em calcular.")
 
 rodape = tk.Label(
     janela,
